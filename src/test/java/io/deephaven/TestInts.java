@@ -1,22 +1,43 @@
 package io.deephaven;
 
 import io.deephaven.csv.reading.CsvReader;
+import io.deephaven.csv.sinks.Sink;
+import io.deephaven.csv.sinks.SinkFactory;
+import io.deephaven.csv.sinks.Source;
+import io.deephaven.csv.util.CsvReaderException;
 import io.deephaven.csv.util.Renderer;
+import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.stream.IntStream;
 
 public class TestInts {
+    @Test
+    public void deephaven() throws CsvReaderException {
+        final Random rng = new Random(12345);
+        final TextAndNubbins tns = buildTable(rng, 1000, 1);
+        final InputStream bais = new ByteArrayInputStream(tns.text.getBytes(StandardCharsets.UTF_8));
 
-    public static void deephaven() {
         final CsvReader reader = new CsvReader();
-        reader.read(rs, new MySinkFactory());
+        final SinkFactory sf = SinkFactory.of(
+                null, null,
+                null, null,
+                MyIntSink::new, null,
+                null, null,
+                null, null,
+                null, null,
+                null, null,
+                null, null,
+                null, null,
+                null, null,
+                null);
+        reader.read(bais, sf);
     }
-}
 
-class Freak {
     public static TextAndNubbins buildTable(final Random rng, final int numRows, final int numCols) {
         final TextAndValues[] tvs = new TextAndValues[numCols];
         for (int ii = 0; ii < numCols; ++ii) {
@@ -51,51 +72,38 @@ class Freak {
             data[ii] = nextValue;
             text[ii] = Integer.toString(nextValue);
         }
-        return TextAndValues(text, data);
+        return new TextAndValues(text, data);
     }
-}
 
+    private static class TextAndNubbins {
+        private final String text;
+        private final Object[] nubbins;
 
-
-// integrals (1..N columns)
-// floatings (1..N columns)
-// datetimes (1..N columns)
-// booleans (1..N columns)
-
-class Junk {
-    public static String makeIntegrals(final String header, final long begin, final long end) {
-        final StringBuilder sb = new StringBuilder(header);
-        sb.append('\n');
-        for (long current = begin; current != end; ++current) {
-            sb.append(current);
-            sb.append('\n');
+        public TextAndNubbins(String text, Object[] nubbins) {
+            this.text = text;
+            this.nubbins = nubbins;
         }
-        return sb.toString();
-    }
-}
-
-/**
- *
- * @param <TCOL1> the
- */
-interface ZamboniInterface<RESULT> {
-    RESULT parse(InputStream is);
-}
-
-
-interface ZamboniInterface1<TCOL> {
-    TARRAY
-}
-
-interface ZamboniInterface3<TCOL1, TCOL2, TCOL3> {
-    Result<TCOL1, TCOL2, TCOL3> parse(InputStream is);
-
-    class Result<TCOL1, TCOL2, TCOL3> {
-        final TCOL1 col1;
-        final TCOL2 col2;
-        final TCOL3 col3;
-
     }
 
+    private static class TextAndValues {
+        private final String[] text;
+        private final int[] data;
 
+        public TextAndValues(String[] text, int[] data) {
+            this.text = text;
+            this.data = data;
+        }
+    }
+
+    private static class MyIntSink implements Sink<int[]>, Source<int[]> {
+        @Override
+        public void write(int[] src, boolean[] isNull, long destBegin, long destEnd, boolean appending) {
+            System.out.println("haha");
+        }
+
+        @Override
+        public void read(int[] dest, boolean[] isNull, long srcBegin, long srcEnd) {
+            System.out.println("haha");
+        }
+    }
 }
