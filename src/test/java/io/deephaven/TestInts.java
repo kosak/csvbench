@@ -26,7 +26,8 @@ public class TestInts {
         final CsvReader reader = new CsvReader();
         final SinkFactory sf = makeMySinkFactory();
         final CsvReader.Result result = reader.read(bais, sf);
-        final int[] data = ((ResultProvider<int[]>)result.columns()[0]).toResult();
+        final Object data = ((ResultProvider<?>) result.columns()[0]).toResult();
+        final int[] typedData = (int[])data;
     }
 
     public static TextAndNubbins buildTable(final Random rng, final int numRows, final int numCols) {
