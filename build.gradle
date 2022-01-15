@@ -15,7 +15,8 @@ dependencies {
           'org.jetbrains:annotations:23.0.0',
           'ch.randelshofer:fastdoubleparser:0.3.0',
           'org.apache.commons:commons-csv:1.9.0',
-           'de.siegmar:fastcsv:2.1.0'
+          'de.siegmar:fastcsv:2.1.0',
+          'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.0'
 
     testImplementation 'org.assertj:assertj-core:3.22.0',
             'junit:junit:4.13.2'

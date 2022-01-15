@@ -1,5 +1,9 @@
 package io.deephaven;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CsvRow;
 import gnu.trove.list.array.*;
@@ -22,6 +26,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -65,7 +70,7 @@ public class TestInts {
     }
 
     @Test
-    public void fastCsv() throws IOException {
+    public void fastCsv() {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
 
@@ -86,6 +91,31 @@ public class TestInts {
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
         System.out.println("Zamboni time");
     }
+
+    @Test
+    public void jacksonCsv() throws IOException {
+        final Random rng = new Random(12345);
+        final TextAndNubbins tns = buildTable(rng, 1000, 1);
+
+        final MappingIterator<List<String>> iterator = new CsvMapper()
+                .enable(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readerFor(List.class)
+                .readValues(tns.text);
+
+        final TIntArrayList results = new TIntArrayList();
+        // Skip header row
+        if (iterator.hasNext()) {
+            iterator.next();
+        }
+        while (iterator.hasNext()) {
+            final List<String> next = iterator.next();
+            results.add(Integer.parseInt(next.get(0)));
+        }
+        final int[] typedData = results.toArray();
+        Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
+        System.out.println("Zamboni time");
+    }
+
 
     public static TextAndNubbins buildTable(final Random rng, final int numRows, final int numCols) {
         final TextAndValues[] tvs = new TextAndValues[numCols];
