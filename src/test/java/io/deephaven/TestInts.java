@@ -1,5 +1,7 @@
 package io.deephaven;
 
+import de.siegmar.fastcsv.reader.CloseableIterator;
+import de.siegmar.fastcsv.reader.CsvRow;
 import gnu.trove.list.array.*;
 import io.deephaven.csv.reading.CsvReader;
 import io.deephaven.csv.sinks.Sink;
@@ -62,6 +64,28 @@ public class TestInts {
         System.out.println("Zamboni time");
     }
 
+    @Test
+    public void fastCsv() throws IOException {
+        final Random rng = new Random(12345);
+        final TextAndNubbins tns = buildTable(rng, 1000, 1);
+
+        final CloseableIterator<CsvRow> iterator = de.siegmar.fastcsv.reader.CsvReader.builder()
+                .build(tns.text)
+                .iterator();
+
+        final TIntArrayList results = new TIntArrayList();
+        // Skip header row
+        if (iterator.hasNext()) {
+            iterator.next();
+        }
+        while (iterator.hasNext()) {
+            final CsvRow next = iterator.next();
+            results.add(Integer.parseInt(next.getField(0)));
+        }
+        final int[] typedData = results.toArray();
+        Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
+        System.out.println("Zamboni time");
+    }
 
     public static TextAndNubbins buildTable(final Random rng, final int numRows, final int numCols) {
         final TextAndValues[] tvs = new TextAndValues[numCols];
