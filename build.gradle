@@ -17,7 +17,8 @@ dependencies {
           'org.apache.commons:commons-csv:1.9.0',
           'de.siegmar:fastcsv:2.1.0',
           'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.1',
-          'com.opencsv:opencsv:5.5.2'
+          'com.opencsv:opencsv:5.5.2',
+          'org.simpleflatmapper:sfm-csv:8.2.3'
 
     testImplementation 'org.assertj:assertj-core:3.22.0',
             'junit:junit:4.13.2'

@@ -139,6 +139,26 @@ public class TestInts {
         System.out.println("Zamboni time");
     }
 
+    @Test
+    public void simpleFlatMapper() throws IOException {
+        final Random rng = new Random(12345);
+        final TextAndNubbins tns = buildTable(rng, 1000, 1);
+
+        Iterator<String[]> iterator = org.simpleflatmapper.lightningcsv.CsvParser.iterator(tns.text);
+        // Skip header row
+        if (iterator.hasNext()) {
+            iterator.next();
+        }
+
+        final TIntArrayList results = new TIntArrayList();
+        while(iterator.hasNext()) {
+            final String[] next = iterator.next();
+            results.add(Integer.parseInt(next[0]));
+        }
+        final int[] typedData = results.toArray();
+        Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
+        System.out.println("Zamboni time");
+    }
 
     public static TextAndNubbins buildTable(final Random rng, final int numRows, final int numCols) {
         final TextAndValues[] tvs = new TextAndValues[numCols];
