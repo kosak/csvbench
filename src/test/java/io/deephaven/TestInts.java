@@ -6,12 +6,20 @@ import io.deephaven.csv.sinks.Sink;
 import io.deephaven.csv.sinks.SinkFactory;
 import io.deephaven.csv.util.CsvReaderException;
 import io.deephaven.csv.util.Renderer;
+import junit.framework.TestCase;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -28,7 +36,32 @@ public class TestInts {
         final CsvReader.Result result = reader.read(bais, sf);
         final Object data = ((ResultProvider<?>) result.columns()[0]).toResult();
         final int[] typedData = (int[])data;
+        Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
+
+    @Test
+    public void apacheCommons() throws IOException {
+        final Random rng = new Random(12345);
+        final TextAndNubbins tns = buildTable(rng, 1000, 1);
+
+        final CSVFormat format = CSVFormat.DEFAULT
+                .builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .setRecordSeparator('\n')
+                .build();
+
+        final CSVParser parser = new CSVParser(new StringReader(tns.text), format);
+
+        final TIntArrayList results = new TIntArrayList();
+        for (CSVRecord next : parser) {
+            results.add(Integer.parseInt(next.get(0)));
+        }
+        final int[] typedData = results.toArray();
+        Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
+        System.out.println("Zamboni time");
+    }
+
 
     public static TextAndNubbins buildTable(final Random rng, final int numRows, final int numCols) {
         final TextAndValues[] tvs = new TextAndValues[numCols];
