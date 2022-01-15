@@ -13,7 +13,8 @@ dependencies {
     implementation 'junit:junit:4.13.2',
           'org.apache.commons:commons-lang3:3.12.0',
           'net.sf.trove4j:trove4j:3.0.3',
-          'org.jetbrains:annotations:23.0.0'
+          'org.jetbrains:annotations:23.0.0',
+          'ch.randelshofer:fastdoubleparser:0.3.0'
 }
 
 test {
