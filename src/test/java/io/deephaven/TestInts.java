@@ -1,17 +1,7 @@
 package io.deephaven;
 
-import de.siegmar.fastcsv.reader.CloseableIterator;
-import de.siegmar.fastcsv.reader.CsvRow;
 import gnu.trove.list.array.*;
-import io.deephaven.csv.reading.CsvReader;
-import io.deephaven.csv.sinks.Sink;
-import io.deephaven.csv.sinks.SinkFactory;
-import io.deephaven.csv.util.CsvReaderException;
 import io.deephaven.csv.util.Renderer;
-import junit.framework.TestCase;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -29,16 +19,16 @@ import java.util.stream.IntStream;
 
 public class TestInts {
     @Test
-    public void deephaven() throws CsvReaderException {
+    public void deephaven() throws io.deephaven.csv.util.CsvReaderException {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
         final InputStream bais = new ByteArrayInputStream(tns.text.getBytes(StandardCharsets.UTF_8));
 
-        final CsvReader reader = new CsvReader();
-        final SinkFactory sf = makeMySinkFactory();
-        final CsvReader.Result result = reader.read(bais, sf);
+        final io.deephaven.csv.reading.CsvReader reader = new io.deephaven.csv.reading.CsvReader();
+        final io.deephaven.csv.sinks.SinkFactory sf = makeMySinkFactory();
+        final io.deephaven.csv.reading.CsvReader.Result result = reader.read(bais, sf);
         final Object data = ((ResultProvider<?>) result.columns()[0]).toResult();
-        final int[] typedData = (int[])data;
+        final int[] typedData = (int[]) data;
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
 
@@ -47,22 +37,21 @@ public class TestInts {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
 
-        final CSVFormat format = CSVFormat.DEFAULT
+        final org.apache.commons.csv.CSVFormat format = org.apache.commons.csv.CSVFormat.DEFAULT
                 .builder()
                 .setHeader()
                 .setSkipHeaderRecord(true)
                 .setRecordSeparator('\n')
                 .build();
 
-        final CSVParser parser = new CSVParser(new StringReader(tns.text), format);
+        final org.apache.commons.csv.CSVParser parser = new org.apache.commons.csv.CSVParser(new StringReader(tns.text), format);
 
         final TIntArrayList results = new TIntArrayList();
-        for (CSVRecord next : parser) {
+        for (org.apache.commons.csv.CSVRecord next : parser) {
             results.add(Integer.parseInt(next.get(0)));
         }
         final int[] typedData = results.toArray();
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
-        System.out.println("Zamboni time");
     }
 
     @Test
@@ -70,7 +59,7 @@ public class TestInts {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
 
-        final CloseableIterator<CsvRow> iterator = de.siegmar.fastcsv.reader.CsvReader.builder()
+        final de.siegmar.fastcsv.reader.CloseableIterator<de.siegmar.fastcsv.reader.CsvRow> iterator = de.siegmar.fastcsv.reader.CsvReader.builder()
                 .build(tns.text)
                 .iterator();
 
@@ -80,12 +69,11 @@ public class TestInts {
             iterator.next();
         }
         while (iterator.hasNext()) {
-            final CsvRow next = iterator.next();
+            final de.siegmar.fastcsv.reader.CsvRow next = iterator.next();
             results.add(Integer.parseInt(next.getField(0)));
         }
         final int[] typedData = results.toArray();
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
-        System.out.println("Zamboni time");
     }
 
     @Test
@@ -144,7 +132,7 @@ public class TestInts {
         }
 
         final TIntArrayList results = new TIntArrayList();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             final String[] next = iterator.next();
             results.add(Integer.parseInt(next[0]));
         }
@@ -262,7 +250,7 @@ public class TestInts {
         TARRAY toResult();
     }
 
-    private static abstract class MySinkBase<TCOLLECTION, TARRAY> implements Sink<TARRAY>, ResultProvider<TARRAY> {
+    private static abstract class MySinkBase<TCOLLECTION, TARRAY> implements io.deephaven.csv.sinks.Sink<TARRAY>, ResultProvider<TARRAY> {
         protected final TCOLLECTION collection;
         protected int collectionSize;
         protected final FillOperation<TCOLLECTION> fillOperation;
@@ -333,7 +321,7 @@ public class TestInts {
     }
 
     private static abstract class MySourceAndSinkBase<TCOLLECTION, TARRAY> extends MySinkBase<TCOLLECTION, TARRAY>
-            implements io.deephaven.csv.sinks.Source<TARRAY>, Sink<TARRAY> {
+            implements io.deephaven.csv.sinks.Source<TARRAY>, io.deephaven.csv.sinks.Sink<TARRAY> {
         private final ReadToArrayOperation<TCOLLECTION, TARRAY> readToArrayOperation;
 
         protected MySourceAndSinkBase(TCOLLECTION collection, FillOperation<TCOLLECTION> fillOperation,
@@ -484,8 +472,8 @@ public class TestInts {
     private static final class MyTimestampAsLongSink extends MyLongSinkBase {
     }
 
-    private static SinkFactory makeMySinkFactory() {
-        return SinkFactory.of(
+    private static io.deephaven.csv.sinks.SinkFactory makeMySinkFactory() {
+        return io.deephaven.csv.sinks.SinkFactory.of(
                 MyByteSink::new, null,
                 MyShortSink::new, null,
                 MyIntSink::new, null,
@@ -499,4 +487,3 @@ public class TestInts {
                 MyTimestampAsLongSink::new, null);
     }
 }
-
