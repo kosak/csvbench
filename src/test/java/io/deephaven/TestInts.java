@@ -1,6 +1,5 @@
 package io.deephaven;
 
-import com.univocity.parsers.csv.CsvParserSettings;
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CsvRow;
 import gnu.trove.list.array.*;
@@ -165,11 +164,11 @@ public class TestInts {
             throw new RuntimeException("Expected header row");
         }
         while (true) {
-            final String[] next = csvReader.readNext();
+            final List<String> next = csvReader.read();
             if (next == null) {
                 break;
             }
-            results.add(Integer.parseInt(next[0]));
+            results.add(Integer.parseInt(next.get(0)));
         }
         final int[] typedData = results.toArray();
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
@@ -177,11 +176,11 @@ public class TestInts {
 
 
     @Test
-    public void univocity() throws IOException, CsvValidationException {
+    public void univocity() {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
 
-        final CsvParserSettings settings = new CsvParserSettings();
+        final com.univocity.parsers.csv.CsvParserSettings settings = new com.univocity.parsers.csv.CsvParserSettings();
         settings.setNullValue("");
         final com.univocity.parsers.csv.CsvParser parser = new com.univocity.parsers.csv.CsvParser(settings);
         parser.beginParsing(new StringReader(tns.text));
