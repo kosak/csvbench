@@ -1,7 +1,5 @@
 package io.deephaven;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvValidationException;
 import com.univocity.parsers.csv.CsvParserSettings;
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CsvRow;
@@ -115,11 +113,11 @@ public class TestInts {
     }
 
     @Test
-    public void openCsv() throws IOException, CsvValidationException {
+    public void openCsv() throws IOException, com.opencsv.exceptions.CsvValidationException {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
 
-        final CSVReader csvReader = new CSVReader(new StringReader(tns.text));
+        final com.opencsv.CSVReader csvReader = new com.opencsv.CSVReader(new StringReader(tns.text));
         final TIntArrayList results = new TIntArrayList();
         if (csvReader.readNext() == null) {
             throw new RuntimeException("Expected header row");
@@ -156,13 +154,14 @@ public class TestInts {
     }
 
     @Test
-    public void superCsv() throws IOException, CsvValidationException {
+    public void superCsv() throws IOException {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
 
-        final CSVReader csvReader = new CSVReader(new StringReader(tns.text));
+        final org.supercsv.io.CsvListReader csvReader = new org.supercsv.io.CsvListReader(new StringReader(tns.text),
+                org.supercsv.prefs.CsvPreference.STANDARD_PREFERENCE);
         final TIntArrayList results = new TIntArrayList();
-        if (csvReader.readNext() == null) {
+        if (csvReader.read() == null) {
             throw new RuntimeException("Expected header row");
         }
         while (true) {
