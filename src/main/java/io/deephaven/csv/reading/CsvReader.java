@@ -185,7 +185,6 @@ public final class CsvReader {
         final Future<Long> numRowsFuture = exec.submit(
                 () -> ParseInputToDenseStorage.doit(firstDataRow, nullValueLiteral, grabber, dsws));
 
-
         final ArrayList<Future<Sink<?>>> sinkFutures = new ArrayList<>();
 
         for (int ii = 0; ii < numOutputCols; ++ii) {
@@ -211,6 +210,7 @@ public final class CsvReader {
             throw new CsvReaderException("Caught exception", inner);
         }
 
+        exec.shutdown();
         return new Result(numRows, headersToUse, sinks);
     }
 

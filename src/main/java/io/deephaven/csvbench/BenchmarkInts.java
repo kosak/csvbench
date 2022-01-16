@@ -1,30 +1,26 @@
 package io.deephaven.csvbench;
 
 import gnu.trove.list.array.*;
-import io.deephaven.csv.util.Renderer;
 import org.assertj.core.api.Assertions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 
-public class BenchmarkInts {
-    private Random rng;
+public class BenchmarkInts implements KosakianBenchmark {
     private TableTextAndData tableTextAndData;
     private ByteArrayInputStream tableTextStream;
     private int[] expectedResult;
     private int[] actualResult;
 
     public void setup() {
-        rng = new Random(12345);
-        tableTextAndData = makeTable(rng, 1000, 1);
+        final Random rng = new Random(12345);
+        tableTextAndData = makeTable(rng, 10_000_000, 1);
         tableTextStream = new ByteArrayInputStream(tableTextAndData.text().getBytes(StandardCharsets.UTF_8));
         expectedResult = (int[])tableTextAndData.columns()[0];
     }
