@@ -59,8 +59,9 @@ public class BenchmarkInts {
         final io.deephaven.csv.reading.CsvReader reader = new io.deephaven.csv.reading.CsvReader();
         final io.deephaven.csv.sinks.SinkFactory sf = makeMySinkFactory();
         final io.deephaven.csv.reading.CsvReader.Result result = reader.read(tableTextStream, sf);
-        final Object data = ((ResultProvider<?>) result.columns()[0]).toResult();
-        final int[] typedData = (int[]) data;
+
+        ResultProvider<?> rp = (ResultProvider<?>) result.columns()[0];
+        actualResult = (int[]) rp.toResult();
     }
 
     public void apacheCommons() throws IOException {
