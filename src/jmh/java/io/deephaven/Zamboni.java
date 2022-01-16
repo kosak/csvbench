@@ -12,13 +12,13 @@ public class Zamboni {
     int y = 123;
 
     @Benchmark
-    @Warmup(iterations = 10, time = 3, timeUnit = TimeUnit.SECONDS)
+    @Warmup(iterations = 2, time = 2, timeUnit = TimeUnit.SECONDS)
     public int baseline() {
         return x;
     }
 
     @Benchmark
-    @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+    @Warmup(iterations = 2, time = 2, timeUnit = TimeUnit.SECONDS)
     public int sum() {
         return x + y;
     }
