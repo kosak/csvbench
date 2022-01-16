@@ -14,47 +14,34 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 public class BenchmarkInts {
     private Random rng;
+    private TableTextAndData tableTextAndData;
+    private ByteArrayInputStream tableTextStream;
+    private int[] expectedResult;
+    private int[] actualResult;
+
     public void setup() {
-        final Random rng = new Random(12345);
-        final TextAndNubbins tns = buildTable(rng, 1000, 1);
-        final InputStream bais = new ByteArrayInputStream(tns.text.getBytes(StandardCharsets.UTF_8));
+        rng = new Random(12345);
+        tableTextAndData = makeTable(rng, 1000, 1);
+        tableTextStream = new ByteArrayInputStream(tableTextAndData.text().getBytes(StandardCharsets.UTF_8));
+        expectedResult = (int[])tableTextAndData.columns()[0];
     }
 
     public void checkResult() {
-
+        Assertions.assertThat(actualResult).isEqualTo(expectedResult);
     }
 
     public void teardown() {
     }
 
-    public static TextAndNubbins buildTable(final Random rng, final int numRows, final int numCols) {
-        final TextAndValues[] tvs = new TextAndValues[numCols];
+    public static TableTextAndData makeTable(final Random rng, final int numRows, final int numCols) {
+        final List<ColumnTextAndData<int[]>> tvs = new ArrayList<>();
         for (int ii = 0; ii < numCols; ++ii) {
-            tvs[ii] = makeIntegers(rng, numRows);
+            tvs.add(makeIntegerColumn(rng, numRows));
         }
-
-        final StringBuilder sb = new StringBuilder();
-        // Write a line of headers like Column1,Column2,...,ColumnN
-        Renderer.renderList(sb, IntStream.range(0, numCols)::iterator, ",", i -> "Column" + (i + 1));
-        sb.append('\n');
-        for (int jj = 0; jj < numRows; ++jj) {
-            final int finalJJ = jj;
-            // Write a line of data like 12,-54321,...,17
-            Renderer.renderList(sb, IntStream.range(0, numCols)::iterator, ",", i -> tvs[i].text[finalJJ]);
-            sb.append('\n');
-        }
-
-        final String text = sb.toString();
-        final Object[] nubbins = new Object[numCols];
-        for (int ii = 0; ii < numCols; ++ii) {
-            nubbins[ii] = tvs[ii].data;
-        }
-
-        return new TextAndNubbins(text, nubbins);
+        return TableTextAndData.of(tvs);
     }
 
     private static ColumnTextAndData<int[]> makeIntegerColumn(Random rng, final int numRows) {
@@ -71,10 +58,9 @@ public class BenchmarkInts {
     public void deephaven() throws io.deephaven.csv.util.CsvReaderException {
         final io.deephaven.csv.reading.CsvReader reader = new io.deephaven.csv.reading.CsvReader();
         final io.deephaven.csv.sinks.SinkFactory sf = makeMySinkFactory();
-        final io.deephaven.csv.reading.CsvReader.Result result = reader.read(bais, sf);
+        final io.deephaven.csv.reading.CsvReader.Result result = reader.read(tableTextStream, sf);
         final Object data = ((ResultProvider<?>) result.columns()[0]).toResult();
         final int[] typedData = (int[]) data;
-        Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
 
     public void apacheCommons() throws IOException {
