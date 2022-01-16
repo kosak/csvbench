@@ -1,11 +1,8 @@
 package io.deephaven;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import com.univocity.parsers.csv.CsvParserSettings;
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CsvRow;
 import gnu.trove.list.array.*;
@@ -99,8 +96,8 @@ public class TestInts {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
 
-        final MappingIterator<List<String>> iterator = new CsvMapper()
-                .enable(CsvParser.Feature.WRAP_AS_ARRAY)
+        final com.fasterxml.jackson.databind.MappingIterator<List<String>> iterator = new com.fasterxml.jackson.dataformat.csv.CsvMapper()
+                .enable(com.fasterxml.jackson.dataformat.csv.CsvParser.Feature.WRAP_AS_ARRAY)
                 .readerFor(List.class)
                 .readValues(tns.text);
 
@@ -136,7 +133,6 @@ public class TestInts {
         }
         final int[] typedData = results.toArray();
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
-        System.out.println("Zamboni time");
     }
 
     @Test
@@ -157,8 +153,55 @@ public class TestInts {
         }
         final int[] typedData = results.toArray();
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
-        System.out.println("Zamboni time");
     }
+
+    @Test
+    public void superCsv() throws IOException, CsvValidationException {
+        final Random rng = new Random(12345);
+        final TextAndNubbins tns = buildTable(rng, 1000, 1);
+
+        final CSVReader csvReader = new CSVReader(new StringReader(tns.text));
+        final TIntArrayList results = new TIntArrayList();
+        if (csvReader.readNext() == null) {
+            throw new RuntimeException("Expected header row");
+        }
+        while (true) {
+            final String[] next = csvReader.readNext();
+            if (next == null) {
+                break;
+            }
+            results.add(Integer.parseInt(next[0]));
+        }
+        final int[] typedData = results.toArray();
+        Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
+    }
+
+
+    @Test
+    public void univocity() throws IOException, CsvValidationException {
+        final Random rng = new Random(12345);
+        final TextAndNubbins tns = buildTable(rng, 1000, 1);
+
+        final CsvParserSettings settings = new CsvParserSettings();
+        settings.setNullValue("");
+        final com.univocity.parsers.csv.CsvParser parser = new com.univocity.parsers.csv.CsvParser(settings);
+        parser.beginParsing(new StringReader(tns.text));
+
+        if (parser.parseNext() == null) {
+            throw new RuntimeException("Expected header row");
+        }
+        final TIntArrayList results = new TIntArrayList();
+        while (true) {
+            final String[] next = parser.parseNext();
+            if (next == null) {
+                break;
+            }
+            results.add(Integer.parseInt(next[0]));
+        }
+        final int[] typedData = results.toArray();
+        Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
+    }
+
 
     public static TextAndNubbins buildTable(final Random rng, final int numRows, final int numCols) {
         final TextAndValues[] tvs = new TextAndValues[numCols];

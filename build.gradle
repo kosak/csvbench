@@ -10,15 +10,17 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-lang3:3.12.0',
-          'net.sf.trove4j:trove4j:3.0.3',
-          'org.jetbrains:annotations:23.0.0',
-          'ch.randelshofer:fastdoubleparser:0.3.0',
-          'org.apache.commons:commons-csv:1.9.0',
-          'de.siegmar:fastcsv:2.1.0',
-          'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.1',
-          'com.opencsv:opencsv:5.5.2',
-          'org.simpleflatmapper:sfm-csv:8.2.3'
+    implementation 'ch.randelshofer:fastdoubleparser:0.3.0',
+            'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.1',
+            'com.opencsv:opencsv:5.5.2',
+            'com.univocity:univocity-parsers:2.9.1',
+            'de.siegmar:fastcsv:2.1.0',
+            'net.sf.supercsv:super-csv:2.4.0',
+            'net.sf.trove4j:trove4j:3.0.3',
+            'org.apache.commons:commons-csv:1.9.0',
+            'org.apache.commons:commons-lang3:3.12.0',
+            'org.jetbrains:annotations:23.0.0',
+            'org.simpleflatmapper:sfm-csv:8.2.3'
 
     testImplementation 'org.assertj:assertj-core:3.22.0',
             'junit:junit:4.13.2'
