@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id "me.champeau.jmh" version "0.6.6"
 }
 
 group 'deephaven.io'
@@ -22,9 +21,6 @@ dependencies {
             'org.apache.commons:commons-lang3:3.12.0',
             'org.jetbrains:annotations:23.0.0',
             'org.simpleflatmapper:sfm-csv:8.2.3'
-
-    testImplementation 'org.assertj:assertj-core:3.22.0',
-            'junit:junit:4.13.2'
 }
 
 test {

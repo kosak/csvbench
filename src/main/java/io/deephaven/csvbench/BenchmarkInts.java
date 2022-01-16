@@ -1,4 +1,4 @@
-package io.deephaven;
+package io.deephaven.csvbench;
 
 import gnu.trove.list.array.*;
 import io.deephaven.csv.util.Renderer;
@@ -17,13 +17,18 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-public class TestInts {
-    @Test
-    public void deephaven() throws io.deephaven.csv.util.CsvReaderException {
+public class BenchmarkInts {
+    public void setup() {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
         final InputStream bais = new ByteArrayInputStream(tns.text.getBytes(StandardCharsets.UTF_8));
+    }
 
+    public void teardown() {
+
+    }
+
+    public void deephaven() throws io.deephaven.csv.util.CsvReaderException {
         final io.deephaven.csv.reading.CsvReader reader = new io.deephaven.csv.reading.CsvReader();
         final io.deephaven.csv.sinks.SinkFactory sf = makeMySinkFactory();
         final io.deephaven.csv.reading.CsvReader.Result result = reader.read(bais, sf);
@@ -32,7 +37,6 @@ public class TestInts {
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
 
-    @Test
     public void apacheCommons() throws IOException {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
@@ -54,7 +58,6 @@ public class TestInts {
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
 
-    @Test
     public void fastCsv() {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
@@ -76,7 +79,6 @@ public class TestInts {
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
 
-    @Test
     public void jacksonCsv() throws IOException {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
@@ -99,7 +101,6 @@ public class TestInts {
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
 
-    @Test
     public void openCsv() throws IOException, com.opencsv.exceptions.CsvValidationException {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
@@ -120,7 +121,6 @@ public class TestInts {
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
 
-    @Test
     public void simpleFlatMapper() throws IOException {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
@@ -140,7 +140,6 @@ public class TestInts {
         Assertions.assertThat(typedData).isEqualTo(tns.nubbins[0]);
     }
 
-    @Test
     public void superCsv() throws IOException {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
@@ -163,7 +162,6 @@ public class TestInts {
     }
 
 
-    @Test
     public void univocity() {
         final Random rng = new Random(12345);
         final TextAndNubbins tns = buildTable(rng, 1000, 1);
