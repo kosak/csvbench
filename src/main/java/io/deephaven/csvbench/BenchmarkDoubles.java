@@ -1,7 +1,6 @@
 package io.deephaven.csvbench;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import org.assertj.core.api.Assertions;
 
 import java.io.ByteArrayInputStream;
@@ -15,7 +14,7 @@ import java.util.Random;
 
 public class BenchmarkDoubles implements KosakianBenchmark {
     private static final int NUM_COLS = 3;
-    private static final int NUM_ROWS = 10_000_000;
+    private static final int NUM_ROWS = 5_000_000;
     private TableTextAndData tableTextAndData;
     private ByteArrayInputStream tableTextStream;
     private double[][] expectedResult;
@@ -29,7 +28,6 @@ public class BenchmarkDoubles implements KosakianBenchmark {
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             expectedResult[ii] = (double[])tableTextAndData.columns()[ii];
         }
-        actualResult = new double[NUM_COLS][];
     }
 
     public void checkResult() {
@@ -63,6 +61,7 @@ public class BenchmarkDoubles implements KosakianBenchmark {
         final io.deephaven.csv.sinks.SinkFactory sf = MySinkFactory.create();
         final io.deephaven.csv.reading.CsvReader.Result result = reader.read(tableTextStream, sf);
 
+        actualResult = new double[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             MySinkFactory.ResultProvider<?> rp = (MySinkFactory.ResultProvider<?>) result.columns()[ii];
             actualResult[ii] = (double[]) rp.toResult();
@@ -89,6 +88,7 @@ public class BenchmarkDoubles implements KosakianBenchmark {
                 results[ii].add(Double.parseDouble(next.get(ii)));
             }
         }
+        actualResult = new double[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -113,6 +113,7 @@ public class BenchmarkDoubles implements KosakianBenchmark {
                 results[ii].add(Double.parseDouble(next.getField(ii)));
             }
         }
+        actualResult = new double[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -138,6 +139,7 @@ public class BenchmarkDoubles implements KosakianBenchmark {
                 results[ii].add(Double.parseDouble(next.get(ii)));
             }
         }
+        actualResult = new double[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -161,6 +163,7 @@ public class BenchmarkDoubles implements KosakianBenchmark {
                 results[ii].add(Double.parseDouble(next[ii]));
             }
         }
+        actualResult = new double[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -173,29 +176,45 @@ public class BenchmarkDoubles implements KosakianBenchmark {
             iterator.next();
         }
 
-        final TIntArrayList results = new TIntArrayList();
+        final TDoubleArrayList[] results = new TDoubleArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TDoubleArrayList();
+        }
         while (iterator.hasNext()) {
             final String[] next = iterator.next();
-            results.add(Integer.parseInt(next[0]));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Double.parseDouble(next[ii]));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new double[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 
     public void superCsv() throws IOException {
         final org.supercsv.io.CsvListReader csvReader = new org.supercsv.io.CsvListReader(new StringReader(tableTextAndData.text()),
                 org.supercsv.prefs.CsvPreference.STANDARD_PREFERENCE);
-        final TIntArrayList results = new TIntArrayList();
         if (csvReader.read() == null) {
             throw new RuntimeException("Expected header row");
+        }
+        final TDoubleArrayList[] results = new TDoubleArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TDoubleArrayList();
         }
         while (true) {
             final List<String> next = csvReader.read();
             if (next == null) {
                 break;
             }
-            results.add(Integer.parseInt(next.get(0)));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Double.parseDouble(next.get(ii)));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new double[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 
     public void univocity() {
@@ -207,14 +226,22 @@ public class BenchmarkDoubles implements KosakianBenchmark {
         if (parser.parseNext() == null) {
             throw new RuntimeException("Expected header row");
         }
-        final TIntArrayList results = new TIntArrayList();
+        final TDoubleArrayList[] results = new TDoubleArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TDoubleArrayList();
+        }
         while (true) {
             final String[] next = parser.parseNext();
             if (next == null) {
                 break;
             }
-            results.add(Integer.parseInt(next[0]));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Double.parseDouble(next[ii]));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new double[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 }

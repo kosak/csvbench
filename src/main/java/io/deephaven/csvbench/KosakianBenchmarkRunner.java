@@ -17,8 +17,16 @@ public class KosakianBenchmarkRunner {
                     BenchmarkInts::openCsv,
                     BenchmarkInts::simpleFlatMapper,
                     BenchmarkInts::superCsv,
-                    BenchmarkInts::univocity
-            );
+                    BenchmarkInts::univocity);
+//            runBenchmark(new BenchmarkDoubles(),
+//                    BenchmarkDoubles::deephaven,
+//                    BenchmarkDoubles::fastCsv,
+//                    BenchmarkDoubles::apacheCommons,
+//                    BenchmarkDoubles::jacksonCsv,
+//                    BenchmarkDoubles::openCsv,
+//                    BenchmarkDoubles::simpleFlatMapper,
+//                    BenchmarkDoubles::superCsv,
+//                    BenchmarkDoubles::univocity);
         } catch (Exception e) {
             System.out.println("Caught exception " + e);
         }

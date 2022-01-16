@@ -13,16 +13,21 @@ import java.util.List;
 import java.util.Random;
 
 public class BenchmarkInts implements KosakianBenchmark {
+    private static final int NUM_COLS = 3;
+    private static final int NUM_ROWS = 5_000_000;
     private TableTextAndData tableTextAndData;
     private ByteArrayInputStream tableTextStream;
-    private int[] expectedResult;
-    private int[] actualResult;
+    private int[][] expectedResult;
+    private int[][] actualResult;
 
     public void setup() {
         final Random rng = new Random(12345);
-        tableTextAndData = makeTable(rng, 10_000_000, 1);
+        tableTextAndData = makeTable(rng, NUM_ROWS, NUM_COLS);
         tableTextStream = new ByteArrayInputStream(tableTextAndData.text().getBytes(StandardCharsets.UTF_8));
-        expectedResult = (int[])tableTextAndData.columns()[0];
+        expectedResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            expectedResult[ii] = (int[])tableTextAndData.columns()[ii];
+        }
     }
 
     public void checkResult() {
@@ -56,8 +61,11 @@ public class BenchmarkInts implements KosakianBenchmark {
         final io.deephaven.csv.sinks.SinkFactory sf = MySinkFactory.create();
         final io.deephaven.csv.reading.CsvReader.Result result = reader.read(tableTextStream, sf);
 
-        MySinkFactory.ResultProvider<?> rp = (MySinkFactory.ResultProvider<?>) result.columns()[0];
-        actualResult = (int[]) rp.toResult();
+        actualResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            MySinkFactory.ResultProvider<?> rp = (MySinkFactory.ResultProvider<?>) result.columns()[ii];
+            actualResult[ii] = (int[]) rp.toResult();
+        }
     }
 
     public void apacheCommons() throws IOException {
@@ -71,11 +79,19 @@ public class BenchmarkInts implements KosakianBenchmark {
         final org.apache.commons.csv.CSVParser parser =
                 new org.apache.commons.csv.CSVParser(new StringReader(tableTextAndData.text()), format);
 
-        final TIntArrayList results = new TIntArrayList();
-        for (org.apache.commons.csv.CSVRecord next : parser) {
-            results.add(Integer.parseInt(next.get(0)));
+        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TIntArrayList();
         }
-        actualResult = results.toArray();
+        for (org.apache.commons.csv.CSVRecord next : parser) {
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Integer.parseInt(next.get(ii)));
+            }
+        }
+        actualResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 
     public void fastCsv() {
@@ -83,16 +99,24 @@ public class BenchmarkInts implements KosakianBenchmark {
                 .build(tableTextAndData.text())
                 .iterator();
 
-        final TIntArrayList results = new TIntArrayList();
         // Skip header row
         if (iterator.hasNext()) {
             iterator.next();
         }
+        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TIntArrayList();
+        }
         while (iterator.hasNext()) {
             final de.siegmar.fastcsv.reader.CsvRow next = iterator.next();
-            results.add(Integer.parseInt(next.getField(0)));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Integer.parseInt(next.getField(ii)));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 
     public void jacksonCsv() throws IOException {
@@ -101,32 +125,48 @@ public class BenchmarkInts implements KosakianBenchmark {
                 .readerFor(List.class)
                 .readValues(tableTextAndData.text());
 
-        final TIntArrayList results = new TIntArrayList();
         // Skip header row
         if (iterator.hasNext()) {
             iterator.next();
         }
+        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TIntArrayList();
+        }
         while (iterator.hasNext()) {
             final List<String> next = iterator.next();
-            results.add(Integer.parseInt(next.get(0)));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Integer.parseInt(next.get(ii)));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 
     public void openCsv() throws IOException, com.opencsv.exceptions.CsvValidationException {
         final com.opencsv.CSVReader csvReader = new com.opencsv.CSVReader(new StringReader(tableTextAndData.text()));
-        final TIntArrayList results = new TIntArrayList();
         if (csvReader.readNext() == null) {
             throw new RuntimeException("Expected header row");
+        }
+        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TIntArrayList();
         }
         while (true) {
             final String[] next = csvReader.readNext();
             if (next == null) {
                 break;
             }
-            results.add(Integer.parseInt(next[0]));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Integer.parseInt(next[ii]));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 
     public void simpleFlatMapper() throws IOException {
@@ -136,29 +176,47 @@ public class BenchmarkInts implements KosakianBenchmark {
             iterator.next();
         }
 
-        final TIntArrayList results = new TIntArrayList();
+        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TIntArrayList();
+        }
         while (iterator.hasNext()) {
             final String[] next = iterator.next();
-            results.add(Integer.parseInt(next[0]));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Integer.parseInt(next[ii]));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
+
     }
 
     public void superCsv() throws IOException {
         final org.supercsv.io.CsvListReader csvReader = new org.supercsv.io.CsvListReader(new StringReader(tableTextAndData.text()),
                 org.supercsv.prefs.CsvPreference.STANDARD_PREFERENCE);
-        final TIntArrayList results = new TIntArrayList();
         if (csvReader.read() == null) {
             throw new RuntimeException("Expected header row");
+        }
+
+        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TIntArrayList();
         }
         while (true) {
             final List<String> next = csvReader.read();
             if (next == null) {
                 break;
             }
-            results.add(Integer.parseInt(next.get(0)));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Integer.parseInt(next.get(ii)));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 
     public void univocity() {
@@ -170,14 +228,23 @@ public class BenchmarkInts implements KosakianBenchmark {
         if (parser.parseNext() == null) {
             throw new RuntimeException("Expected header row");
         }
-        final TIntArrayList results = new TIntArrayList();
+
+        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            results[ii] = new TIntArrayList();
+        }
         while (true) {
             final String[] next = parser.parseNext();
             if (next == null) {
                 break;
             }
-            results.add(Integer.parseInt(next[0]));
+            for (int ii = 0; ii < NUM_COLS; ++ii) {
+                results[ii].add(Integer.parseInt(next[ii]));
+            }
         }
-        actualResult = results.toArray();
+        actualResult = new int[NUM_COLS][];
+        for (int ii = 0; ii < NUM_COLS; ++ii) {
+            actualResult[ii] = results[ii].toArray();
+        }
     }
 }
