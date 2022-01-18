@@ -1,6 +1,6 @@
 package io.deephaven.csvbench;
 
-import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import org.assertj.core.api.Assertions;
 
 import java.io.ByteArrayInputStream;
@@ -18,16 +18,16 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
     private static final int NUM_ROWS = 500_000;
     private TableTextAndData tableTextAndData;
     private ByteArrayInputStream tableTextStream;
-    private int[][] expectedResult;
-    private int[][] actualResult;
+    private long[][] expectedResult;
+    private long[][] actualResult;
 
     public void setup() {
         final Random rng = new Random(12345);
         tableTextAndData = makeTable(rng, NUM_ROWS, NUM_COLS);
         tableTextStream = new ByteArrayInputStream(tableTextAndData.text().getBytes(StandardCharsets.UTF_8));
-        expectedResult = new int[NUM_COLS][];
+        expectedResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
-            expectedResult[ii] = (int[])tableTextAndData.columns()[ii];
+            expectedResult[ii] = (long[])tableTextAndData.columns()[ii];
         }
     }
 
@@ -39,7 +39,7 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
     }
 
     public static TableTextAndData makeTable(final Random rng, final int numRows, final int numCols) {
-        final List<ColumnTextAndData<long[]>> tvs = new ArrayList<>();
+        final List<ColumnTextAndData<?>> tvs = new ArrayList<>();
         for (int ii = 0; ii < numCols; ++ii) {
             tvs.add(makeDateTimeColumn(rng, numRows));
         }
@@ -73,10 +73,10 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
         final io.deephaven.csv.sinks.SinkFactory sf = MySinkFactory.create();
         final io.deephaven.csv.reading.CsvReader.Result result = reader.read(tableTextStream, sf);
 
-        actualResult = new int[NUM_COLS][];
+        actualResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             MySinkFactory.ResultProvider<?> rp = (MySinkFactory.ResultProvider<?>) result.columns()[ii];
-            actualResult[ii] = (int[]) rp.toResult();
+            actualResult[ii] = (long[]) rp.toResult();
         }
     }
 
@@ -91,16 +91,16 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
         final org.apache.commons.csv.CSVParser parser =
                 new org.apache.commons.csv.CSVParser(new StringReader(tableTextAndData.text()), format);
 
-        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        final TLongArrayList[] results = new TLongArrayList[NUM_COLS];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
-            results[ii] = new TIntArrayList();
+            results[ii] = new TLongArrayList();
         }
         for (org.apache.commons.csv.CSVRecord next : parser) {
             for (int ii = 0; ii < NUM_COLS; ++ii) {
-                results[ii].add(Integer.parseInt(next.get(ii)));
+                results[ii].add(parseDateTime(next.get(ii)));
             }
         }
-        actualResult = new int[NUM_COLS][];
+        actualResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -115,17 +115,17 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
         if (iterator.hasNext()) {
             iterator.next();
         }
-        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        final TLongArrayList[] results = new TLongArrayList[NUM_COLS];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
-            results[ii] = new TIntArrayList();
+            results[ii] = new TLongArrayList();
         }
         while (iterator.hasNext()) {
             final de.siegmar.fastcsv.reader.CsvRow next = iterator.next();
             for (int ii = 0; ii < NUM_COLS; ++ii) {
-                results[ii].add(Integer.parseInt(next.getField(ii)));
+                results[ii].add(parseDateTime(next.getField(ii)));
             }
         }
-        actualResult = new int[NUM_COLS][];
+        actualResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -141,17 +141,17 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
         if (iterator.hasNext()) {
             iterator.next();
         }
-        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        final TLongArrayList[] results = new TLongArrayList[NUM_COLS];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
-            results[ii] = new TIntArrayList();
+            results[ii] = new TLongArrayList();
         }
         while (iterator.hasNext()) {
             final List<String> next = iterator.next();
             for (int ii = 0; ii < NUM_COLS; ++ii) {
-                results[ii].add(Integer.parseInt(next.get(ii)));
+                results[ii].add(parseDateTime(next.get(ii)));
             }
         }
-        actualResult = new int[NUM_COLS][];
+        actualResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -162,9 +162,9 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
         if (csvReader.readNext() == null) {
             throw new RuntimeException("Expected header row");
         }
-        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        final TLongArrayList[] results = new TLongArrayList[NUM_COLS];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
-            results[ii] = new TIntArrayList();
+            results[ii] = new TLongArrayList();
         }
         while (true) {
             final String[] next = csvReader.readNext();
@@ -172,10 +172,10 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
                 break;
             }
             for (int ii = 0; ii < NUM_COLS; ++ii) {
-                results[ii].add(Integer.parseInt(next[ii]));
+                results[ii].add(parseDateTime(next[ii]));
             }
         }
-        actualResult = new int[NUM_COLS][];
+        actualResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -188,17 +188,17 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
             iterator.next();
         }
 
-        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        final TLongArrayList[] results = new TLongArrayList[NUM_COLS];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
-            results[ii] = new TIntArrayList();
+            results[ii] = new TLongArrayList();
         }
         while (iterator.hasNext()) {
             final String[] next = iterator.next();
             for (int ii = 0; ii < NUM_COLS; ++ii) {
-                results[ii].add(Integer.parseInt(next[ii]));
+                results[ii].add(parseDateTime(next[ii]));
             }
         }
-        actualResult = new int[NUM_COLS][];
+        actualResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -212,9 +212,9 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
             throw new RuntimeException("Expected header row");
         }
 
-        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        final TLongArrayList[] results = new TLongArrayList[NUM_COLS];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
-            results[ii] = new TIntArrayList();
+            results[ii] = new TLongArrayList();
         }
         while (true) {
             final List<String> next = csvReader.read();
@@ -222,10 +222,10 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
                 break;
             }
             for (int ii = 0; ii < NUM_COLS; ++ii) {
-                results[ii].add(Integer.parseInt(next.get(ii)));
+                results[ii].add(parseDateTime(next.get(ii)));
             }
         }
-        actualResult = new int[NUM_COLS][];
+        actualResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
@@ -241,9 +241,9 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
             throw new RuntimeException("Expected header row");
         }
 
-        final TIntArrayList[] results = new TIntArrayList[NUM_COLS];
+        final TLongArrayList[] results = new TLongArrayList[NUM_COLS];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
-            results[ii] = new TIntArrayList();
+            results[ii] = new TLongArrayList();
         }
         while (true) {
             final String[] next = parser.parseNext();
@@ -251,12 +251,19 @@ public class BenchmarkDateTimes implements KosakianBenchmark {
                 break;
             }
             for (int ii = 0; ii < NUM_COLS; ++ii) {
-                results[ii].add(Integer.parseInt(next[ii]));
+                results[ii].add(parseDateTime(next[ii]));
             }
         }
-        actualResult = new int[NUM_COLS][];
+        actualResult = new long[NUM_COLS][];
         for (int ii = 0; ii < NUM_COLS; ++ii) {
             actualResult[ii] = results[ii].toArray();
         }
+    }
+
+    private static long parseDateTime(final String dateText) {
+        final ZonedDateTime zdt = ZonedDateTime.parse(dateText);
+        final long zdtSeconds = zdt.toEpochSecond();
+        final int zdtNanos = zdt.getNano();
+        return zdtSeconds * 1_000_000_000 + zdtNanos;
     }
 }

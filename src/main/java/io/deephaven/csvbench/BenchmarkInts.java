@@ -38,7 +38,7 @@ public class BenchmarkInts implements KosakianBenchmark {
     }
 
     public static TableTextAndData makeTable(final Random rng, final int numRows, final int numCols) {
-        final List<ColumnTextAndData<int[]>> tvs = new ArrayList<>();
+        final List<ColumnTextAndData<?>> tvs = new ArrayList<>();
         for (int ii = 0; ii < numCols; ++ii) {
             tvs.add(makeIntegerColumn(rng, numRows));
         }

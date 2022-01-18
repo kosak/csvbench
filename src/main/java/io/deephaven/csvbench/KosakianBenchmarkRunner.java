@@ -1,5 +1,7 @@
 package io.deephaven.csvbench;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

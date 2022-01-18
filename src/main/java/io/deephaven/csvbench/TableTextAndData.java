@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public class TableTextAndData {
-    public static <TARRAY> TableTextAndData of(List<ColumnTextAndData<TARRAY>> inputColumns) {
+    public static TableTextAndData of(List<ColumnTextAndData<?>> inputColumns) {
         final int numCols = inputColumns.size();
         final int numRows = inputColumns.get(0).text().length;
 
