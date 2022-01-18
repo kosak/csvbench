@@ -9,15 +9,15 @@ public class KosakianBenchmarkRunner {
     public static void main(String[] args) {
         System.out.println("hello");
         try {
-            runBenchmark(new BenchmarkInts(),
-                    BenchmarkInts::deephaven,
-                    BenchmarkInts::fastCsv,
-                    BenchmarkInts::apacheCommons,
-                    BenchmarkInts::jacksonCsv,
-                    BenchmarkInts::openCsv,
-                    BenchmarkInts::simpleFlatMapper,
-                    BenchmarkInts::superCsv,
-                    BenchmarkInts::univocity);
+//            runBenchmark(new BenchmarkInts(),
+//                    BenchmarkInts::deephaven,
+//                    BenchmarkInts::fastCsv,
+//                    BenchmarkInts::apacheCommons,
+//                    BenchmarkInts::jacksonCsv,
+//                    BenchmarkInts::openCsv,
+//                    BenchmarkInts::simpleFlatMapper,
+//                    BenchmarkInts::superCsv,
+//                    BenchmarkInts::univocity);
 //            runBenchmark(new BenchmarkDoubles(),
 //                    BenchmarkDoubles::deephaven,
 //                    BenchmarkDoubles::fastCsv,
@@ -27,6 +27,15 @@ public class KosakianBenchmarkRunner {
 //                    BenchmarkDoubles::simpleFlatMapper,
 //                    BenchmarkDoubles::superCsv,
 //                    BenchmarkDoubles::univocity);
+            runBenchmark(new BenchmarkDateTimes(),
+                    BenchmarkDateTimes::deephaven,
+                    BenchmarkDateTimes::fastCsv,
+                    BenchmarkDateTimes::apacheCommons,
+                    BenchmarkDateTimes::jacksonCsv,
+                    BenchmarkDateTimes::openCsv,
+                    BenchmarkDateTimes::simpleFlatMapper,
+                    BenchmarkDateTimes::superCsv,
+                    BenchmarkDateTimes::univocity);
         } catch (Exception e) {
             System.out.println("Caught exception " + e);
         }
