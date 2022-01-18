@@ -29,15 +29,24 @@ public class KosakianBenchmarkRunner {
 //                    BenchmarkDoubles::simpleFlatMapper,
 //                    BenchmarkDoubles::superCsv,
 //                    BenchmarkDoubles::univocity);
-            runBenchmark(new BenchmarkDateTimes(),
-                    BenchmarkDateTimes::deephaven,
-                    BenchmarkDateTimes::fastCsv,
-                    BenchmarkDateTimes::apacheCommons,
-                    BenchmarkDateTimes::jacksonCsv,
-                    BenchmarkDateTimes::openCsv,
-                    BenchmarkDateTimes::simpleFlatMapper,
-                    BenchmarkDateTimes::superCsv,
-                    BenchmarkDateTimes::univocity);
+//            runBenchmark(new BenchmarkDateTimes(),
+//                    BenchmarkDateTimes::deephaven,
+//                    BenchmarkDateTimes::fastCsv,
+//                    BenchmarkDateTimes::apacheCommons,
+//                    BenchmarkDateTimes::jacksonCsv,
+//                    BenchmarkDateTimes::openCsv,
+//                    BenchmarkDateTimes::simpleFlatMapper,
+//                    BenchmarkDateTimes::superCsv,
+//                    BenchmarkDateTimes::univocity);
+            runBenchmark(new BenchmarkStrings(),
+                    BenchmarkStrings::deephaven,
+                    BenchmarkStrings::fastCsv,
+                    BenchmarkStrings::apacheCommons,
+                    BenchmarkStrings::jacksonCsv,
+                    BenchmarkStrings::openCsv,
+                    BenchmarkStrings::simpleFlatMapper,
+                    BenchmarkStrings::superCsv,
+                    BenchmarkStrings::univocity);
         } catch (Exception e) {
             System.out.println("Caught exception " + e);
         }
